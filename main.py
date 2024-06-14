@@ -1,5 +1,6 @@
 """программа для скрытия номера карты/счета"""
 from src.widget import get_mask_card_and_mask_pay
+from src.date import get_date
 
 if __name__ == "__main__":
 
@@ -65,4 +66,6 @@ if __name__ == "__main__":
     mask_pay = mask_card_and_check()
     print(mask_pay)
 
-
+    # системная дата устройства
+    date = get_date()
+    print(f"\nТекущая дата {date}\n")
