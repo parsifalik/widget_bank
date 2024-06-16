@@ -43,3 +43,11 @@ git clone https://github.com/parsifalik/widget_bank.git
 `widget.py`
 - Модуль `widget.py` содержит функцию `get_mask_card_and_mask_pay(card_and_pay)`, 
 которая принимает номер карты или счета и возвращает маскированные данные.
+
+`processing.py`
+
+Модуль `processing.py` содержит функции для фильтрации и сортировки логов операций:
+
+- `filter_by_state(list_dict, state)`: Фильтрует логи по статусу выполнения операций ("EXECUTED" или "CANCELED").
+
+- `sort_by_date(list_dict, sort)`: Сортирует логи по дате операций в порядке возрастания или убывания.
