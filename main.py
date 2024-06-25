@@ -82,7 +82,7 @@ if __name__ == "__main__":
     # передаем функции в модуле src/processing.py данные из списка словарей для деления на две строки
     # по статусу выполнения операций
     logger = filter_by_state(list_dict, state="EXECUTED")
-    print(f"Журнал задач:\n{logger}")
+    print(f"Журнал задач:\n  по статусу:\n\t{logger}")
     # передаем функции в модуле src/processing.py данные из списка словарей для сортировки по дате и времени операций
     logger_reverse = sort_by_date(list_dict, sort=True)
-    print(logger_reverse)
+    print(f'  по дате:\n\t{logger_reverse}')

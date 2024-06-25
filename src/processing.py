@@ -17,9 +17,9 @@ def filter_by_state(list_dict: List[Dict], state: str) -> str:
         elif item.get("state") == "CANCELED":
             result_canceled.append(item)
     if str(state) == "EXECUTED":
-        total_result = f"{result_executed}\n{result_canceled}"
+        total_result = f"{result_executed}\n    {result_canceled}"
     elif str(state) == "CANCELED":
-        total_result = f"{result_canceled}\n{result_executed}"
+        total_result = f"{result_canceled}\n    {result_executed}"
     return str(total_result)
 
 
