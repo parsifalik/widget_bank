@@ -3,6 +3,8 @@
 from src.date import get_date
 from src.processing import filter_by_state, sort_by_date
 from src.widget import get_mask_card_and_mask_pay
+from src.generators import filter_by_identifier, filter_by_description, card_number_generator
+from src.resources import get_logs
 
 if __name__ == "__main__":
 
@@ -56,7 +58,7 @@ if __name__ == "__main__":
                 number_card_or_check = ""
 
         """Вызов и передача функции номера карты пользователя"""
-        # если все проверки удачны, передаем данные на обработку маскировеи карты/счета
+        # если все проверки удачны, передаем данные на обработку маскировки карты/счета
         if name_card_or_check.startswith("счет"):
             mask_check = get_mask_card_and_mask_pay(number_card_or_check)
             return f"Счет {mask_check}"
@@ -72,17 +74,45 @@ if __name__ == "__main__":
     date = get_date()
     print(f"\nТекущая дата {date}\n")
 
-    # журнал задач или лог выполненных задач
-    list_dict = [
-        {"id": 41428829, "state": "EXECUTED", "date": "2019-07-03T18:35:29.512364"},
-        {"id": 939719570, "state": "EXECUTED", "date": "2018-06-30T02:08:58.425572"},
-        {"id": 594226727, "state": "CANCELED", "date": "2018-09-12T21:27:25.241689"},
-        {"id": 615064591, "state": "CANCELED", "date": "2018-10-14T08:21:33.419441"},
-    ]
+    # логи(id, статус, дата, операция, сумма средств, валюта, перевод от кого(организация счет или карта) и кому перевод
+    logs = get_logs()
+
     # передаем функции в модуле src/processing.py данные из списка словарей для деления на две строки
     # по статусу выполнения операций
-    logger = filter_by_state(list_dict, state="EXECUTED")
+    logger = filter_by_state(logs, state="EXECUTED")
     print(f"Журнал задач:\n  по статусу:\n\t{logger}")
+
     # передаем функции в модуле src/processing.py данные из списка словарей для сортировки по дате и времени операций
-    logger_reverse = sort_by_date(list_dict, sort=True)
-    print(f'  по дате:\n\t{logger_reverse}')
+    logger_reverse = sort_by_date(logs, sort=True)
+    print(f'  по дате:\n\t{logger_reverse}\n')
+
+    """
+    создаем объект генератора, передаем аргумент в функцию в модуле src/generators.py данные из списка словарей(logs) 
+    для вывода идентификатора операции/описание операций(транзакций)/генерация номеров карт
+    """
+    # идентификатор операции
+    identifier = filter_by_identifier(logs, "USD")
+
+    try:
+        for _id in range(len(logs)):
+            print(next(identifier))
+    except StopIteration:
+        pass
+    finally:
+        print()
+
+    # описание операции(транзакций)
+    description = filter_by_description(logs)
+    try:
+        while True:
+            print(next(description))
+    except StopIteration:
+        pass
+    finally:
+        print()
+
+    #генерация номеров карт
+    quantity = 5
+    gen_num_card = card_number_generator(quantity, 0, 9)
+    for card in range(quantity):
+        print(next(gen_num_card))
