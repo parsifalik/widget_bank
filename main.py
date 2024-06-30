@@ -1,7 +1,9 @@
 """программа для скрытия номера карты/счета"""
 
 from src.date import get_date
+from src.generators import card_number_generator, filter_by_description, filter_by_currency
 from src.processing import filter_by_state, sort_by_date
+from src.resources import get_logs
 from src.widget import get_mask_card_and_mask_pay
 
 if __name__ == "__main__":
@@ -20,6 +22,14 @@ if __name__ == "__main__":
         # делим строку на название карты/счета и номера карты/счета
         number_card_or_check = ""
         name_card_or_check = ""
+        card_names = {
+            "visaclassic": "Visa Classic",
+            "visaplatinum": "Visa Platinum",
+            "visagold": "Visa Gold",
+            "visa": "Visa",
+            "mastercard": "Mastercard",
+            "maestro": "Maestro",
+        }
 
         is_correct_pay = True
         while is_correct_pay:
@@ -31,58 +41,71 @@ if __name__ == "__main__":
                     number_card_or_check += elem
                 elif elem.isalpha():
                     name_card_or_check += elem
-
-            card_names = ["maestro", "mastercard", "visaclassic", "visaplatinum", "visagold", "visa"]
-            if (any(name_card_or_check.startswith(pay) for pay in card_names)) and (len(number_card_or_check) == 16):
-                if (name_card_or_check[:4] == "visa") and (name_card_or_check[4:11] == "classic"):
-                    name_card_or_check = "Visa Classic"
-                elif (name_card_or_check[:4] == "visa") and (name_card_or_check[4:12]) == "platinum":
-                    name_card_or_check = "Visa Platinum"
-                elif (name_card_or_check[:4] == "visa") and (name_card_or_check[4:8] == "gold"):
-                    name_card_or_check = "Visa Gold"
-                elif name_card_or_check == "visa":
-                    name_card_or_check = "Visa"
-                elif name_card_or_check == "mastercard":
-                    name_card_or_check = "Mastercard"
-                elif name_card_or_check == "maestro":
-                    name_card_or_check = "Maestro"
-                is_correct_pay = False
-            elif (name_card_or_check == "счет" or name_card_or_check == "счёт") and len(number_card_or_check) == 20:
+            if len(number_card_or_check) == 16:
+                for min_name, full_name in card_names.items():
+                    if name_card_or_check.startswith(min_name) and len(number_card_or_check) == 16:
+                        name_card_or_check = full_name
+                        is_correct_pay = False
+                        break
+            elif name_card_or_check in ("счет", "счёт") and len(number_card_or_check) == 20:
                 name_card_or_check = "счет"
                 is_correct_pay = False
             else:
                 print("Некорректный номер или карта")
                 name_card_or_check = ""
                 number_card_or_check = ""
-
-        """Вызов и передача функции номера карты пользователя"""
-        # если все проверки удачны, передаем данные на обработку маскировеи карты/счета
+        # если все проверки удачны, передаем данные на обработку
+        # счет
         if name_card_or_check.startswith("счет"):
             mask_check = get_mask_card_and_mask_pay(number_card_or_check)
             return f"Счет {mask_check}"
-        else:
-            mask_card = get_mask_card_and_mask_pay(number_card_or_check)
-            return f"{name_card_or_check} {mask_card}"
+        # карта
+        mask_card = get_mask_card_and_mask_pay(number_card_or_check)
+        return f"{name_card_or_check} {mask_card}"
 
     # вызов функции mask_card_and_check()
     mask_pay = mask_card_and_check()
     print(mask_pay)
-
     # системная дата устройства
     date = get_date()
     print(f"\nТекущая дата {date}\n")
 
-    # журнал задач или лог выполненных задач
-    list_dict = [
-        {"id": 41428829, "state": "EXECUTED", "date": "2019-07-03T18:35:29.512364"},
-        {"id": 939719570, "state": "EXECUTED", "date": "2018-06-30T02:08:58.425572"},
-        {"id": 594226727, "state": "CANCELED", "date": "2018-09-12T21:27:25.241689"},
-        {"id": 615064591, "state": "CANCELED", "date": "2018-10-14T08:21:33.419441"},
-    ]
+    # логи(id, статус, дата, операция, сумма средств, валюта, перевод от кого(организация счет или карта) и кому
+    logs = get_logs()
+
     # передаем функции в модуле src/processing.py данные из списка словарей для деления на две строки
     # по статусу выполнения операций
-    logger = filter_by_state(list_dict, state="EXECUTED")
-    print(f"Журнал задач:\n  по статусу:\n\t{logger}")
+    EXECUTED_LOGS = filter_by_state(logs, state="EXECUTED")
+    print(f"Журнал задач:\n  по статусу:\n\t{EXECUTED_LOGS}")
+
     # передаем функции в модуле src/processing.py данные из списка словарей для сортировки по дате и времени операций
-    logger_reverse = sort_by_date(list_dict, sort=True)
-    print(f'  по дате:\n\t{logger_reverse}')
+    logger_reverse = sort_by_date(logs, sort=True)
+    print(f"  по дате:\n\t{logger_reverse}\n")
+
+    # создаем объект генератора, передаем аргумент в функцию в модуле src/generators.py данные из списка словарей(logs)
+    identifier = filter_by_currency(logs, "USD")
+
+    # идентификатор операции
+    try:
+        for _id in range(len(logs)):
+            print(next(identifier))
+    except StopIteration:
+        pass
+    finally:
+        print()
+
+    # описание операции(транзакций)
+    description = filter_by_description(logs)
+    try:
+        while True:
+            print(next(description))
+    except StopIteration:
+        pass
+    finally:
+        print()
+
+    # генерация номеров карт
+    QUANTITY = 5
+    gen_num_card = card_number_generator(QUANTITY, 0, 9)
+    for card in range(QUANTITY):
+        print(next(gen_num_card))
