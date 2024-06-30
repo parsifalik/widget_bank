@@ -1,12 +1,17 @@
+"""
+В этом модуле реализованы две функции, тестирующие 2 функции из модуля:
+    "src/processing", "filter_by_state, sort_by_date"
+"""
+
 from src.processing import filter_by_state, sort_by_date
 
 
 def test_sort_logs_by_date(logs_data, sort_logs_by_date_true, sort_logs_by_date_false):
     """
-    тест сортировки логов по дате статус "TRUE/FALSE"
-    :param logs_data: подаваемые логи в тестируемую функцию: src/processing -> sort_by_date
-    :param sort_logs_by_date_true: статус TRUE сортирует от большего к меньшему
-    :param sort_logs_by_date_false: статус FALSE сортирует от меньшему к большего
+    Сортировка логов по дате статус "TRUE/FALSE".
+    :param logs_data: Подаваемые логи в тестируемую функцию: src/processing -> sort_by_date.
+    :param sort_logs_by_date_true: Статус TRUE сортирует от большего к меньшему.
+    :param sort_logs_by_date_false: Статус FALSE сортирует от меньшему к большего.
     """
     state_true = True
     state_false = False
@@ -16,10 +21,10 @@ def test_sort_logs_by_date(logs_data, sort_logs_by_date_true, sort_logs_by_date_
 
 def test_filter_by_state(logs_data, filter_by_logs_state_executed, filter_by_logs_state_canceled):
     """
-    тест функции на предмет логов по статусу
-    :param logs_data: принимает фикстуру логов, и отдает ее в тестируемую функцию
-    :param filter_by_logs_state_executed: фикстура для сравнения того что отдаст тестируемая функия статус 'EXECUTED'
-    :param filter_by_logs_state_canceled: то же самое что описано выше, но по статусу 'CANCELED'
+    Тест функции на предмет логов по статусу.
+    :param logs_data: Фикстура логов.
+    :param filter_by_logs_state_executed: Фикстура для сравнения того что отдаст тестируемая функция статус 'EXECUTED'.
+    :param filter_by_logs_state_canceled: То же самое что описано выше, но по статусу 'CANCELED'.
     """
     state_canceled = "CANCELED"
     state_executed = "EXECUTED"
